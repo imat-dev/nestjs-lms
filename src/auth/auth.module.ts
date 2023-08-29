@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { UserSchema } from 'src/entities/user.entity';
+import { JWTStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -14,14 +15,16 @@ import { UserSchema } from 'src/entities/user.entity';
         schema: UserSchema,
       },
     ]),
-    JwtModule.register({
-      secret: process.env.AUTH_SECRET,
-      signOptions: {
-        expiresIn: '60m',
-      },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.AUTH_SECRET,
+        signOptions: {
+          expiresIn: '60m',
+        },
+      }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, JWTStrategy],
 })
 export class AuthModule {}

@@ -47,20 +47,10 @@ export class CoursesService {
   }
 
   public async createCrouse(course: any): Promise<Course> {
-    console.log(course);
-
     //saving into memory first
     const newCourse = new this.coursesModel(course);
-
-    try {
-      const savedCourse = await newCourse.save();
-      return savedCourse;
-    } catch (err) {
-      throw new InternalServerErrorException(err);
-    }
-
-    // console.log(newCourse);
+    await newCourse.save();
     //return the converted object in memory
-    // return await newCourse.toObject({ versionKey: false });
+    return await newCourse.toObject({ versionKey: false });
   }
 }

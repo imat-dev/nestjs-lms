@@ -4,6 +4,7 @@ import { Strategy } from 'passport-local';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/entities/user.entity';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -12,6 +13,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectModel('Users')
     private readonly userModel: Model<User>,
+
+    private readonly authService: AuthService,
   ) {
     super({
       usernameField: 'email',
@@ -24,17 +27,17 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      this.logger.debug(`User $email not found.`);
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
-    this.logger.debug(user);
-    this.logger.debug(user.passwordHash);
-    this.logger.debug(user.email);
+    const isValid = await this.authService.comparePassword(
+      password,
+      user.passwordHash,
+    );
 
-    if (password !== user.passwordHash) {
+    if (!isValid) {
       this.logger.debug(`Password incorrect`);
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Incorrect username or password');
     }
 
     return user;
