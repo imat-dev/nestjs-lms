@@ -23,6 +23,7 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     const user = await this.userModel
       .findById(payload.sub)
       .select('-passwordHash');
+      
     return user;
   }
 }

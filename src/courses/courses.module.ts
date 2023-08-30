@@ -6,6 +6,7 @@ import { CoursesService } from './service/courses.service';
 import { LessonSchema } from '../entities/lesson.entity';
 import { LessonsService } from './service/lessons.service';
 import { LessonsController } from './controller/lessons.controller';
+import { RolesGuard } from 'src/guards/roles.guard';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { LessonsController } from './controller/lessons.controller';
     ]),
   ],
   controllers: [CoursesController, LessonsController],
-  providers: [CoursesService, LessonsService],
+  providers: [CoursesService, LessonsService, RolesGuard],
 })
 export class CoursesModule {}

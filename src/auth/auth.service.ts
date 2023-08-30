@@ -13,7 +13,8 @@ export class AuthService {
     // token will return {email, sub, iat, eat} iat and eat are token created time and epiration time
     const token = this.jwtService.sign({
       email: user.email,
-      sub: user._id,
+      roles: user.roles,
+      sub: user._id,     // .sub is most common name for storing id
     });
 
     return token;

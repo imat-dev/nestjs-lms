@@ -1,133 +1,133 @@
-import {findAllCourses, findAllUsers, findLessonsForCourse} from './db_data';
+// import {findAllCourses, findAllUsers, findLessonsForCourse} from './db_data';
 
-const util = require('util');
+// const util = require('util');
 
-const password = require('password-hash-and-salt');
+// const password = require('password-hash-and-salt');
 
-console.log("Populating the MongoDB database with some sample data ...");
+// console.log("Populating the MongoDB database with some sample data ...");
 
-const MongoClient = require('mongodb').MongoClient;
-var ObjectId = require('mongodb').ObjectID;
-
-
-/*****************************************************************************************************
-*
-*
-* IMPORTANT!!!
-*
-* MongoDB Connection URL - create your own url with the right cluster name, username, password and database name
-*
-* Format: mongodb+srv://username:password@clustername
-*
-* Example (don't use this as you don't have write access):
-*
-* mongodb+srv://nestjs:ZeEjdswOWHwoenQO@cluster0-dbucq.gcp.mongodb.net
-*
-*****************************************************************************************************/
-
-const MONGODB_CONNECTION_URL = 'mongodb+srv://imat:12345@cluster0.avcqfbf.mongodb.net/?retryWrites=true&w=majority';
-
-// Database Name
-const dbName = 'nestjs-course';
+// const MongoClient = require('mongodb').MongoClient;
+// var ObjectId = require('mongodb').ObjectID;
 
 
+// /*****************************************************************************************************
+// *
+// *
+// * IMPORTANT!!!
+// *
+// * MongoDB Connection URL - create your own url with the right cluster name, username, password and database name
+// *
+// * Format: mongodb+srv://username:password@clustername
+// *
+// * Example (don't use this as you don't have write access):
+// *
+// * mongodb+srv://nestjs:ZeEjdswOWHwoenQO@cluster0-dbucq.gcp.mongodb.net
+// *
+// *****************************************************************************************************/
+
+// const MONGODB_CONNECTION_URL = 'mongodb+srv://imat:12345@cluster0.avcqfbf.mongodb.net/?retryWrites=true&w=majority';
+
+// // Database Name
+// const dbName = 'nestjs-course';
 
 
 
-// Create a new MongoClient
-const client = new MongoClient(MONGODB_CONNECTION_URL);
 
-// Use connect method to connect to the Server
-client.connect(async (err, client) => {
 
-  try {
+// // Create a new MongoClient
+// const client = new MongoClient(MONGODB_CONNECTION_URL);
 
-    if (err) {
-      console.log("Error connecting to database, please check the username and password, exiting.");
-      process.exit();
-    }
+// // Use connect method to connect to the Server
+// client.connect(async (err, client) => {
 
-    console.log("Connected correctly to server");
+//   try {
 
-    const db = client.db(dbName);
+//     if (err) {
+//       console.log("Error connecting to database, please check the username and password, exiting.");
+//       process.exit();
+//     }
 
-    const courses = findAllCourses();
+//     console.log("Connected correctly to server");
 
-    for (let i = 0; i < courses.length; i++) {
+//     const db = client.db(dbName);
 
-      const course:any = courses[i];
+//     const courses = findAllCourses();
 
-      const newCourse: any = {...course};
-      delete newCourse.id;
+//     for (let i = 0; i < courses.length; i++) {
 
-      console.log("Inserting course ",  newCourse);
+//       const course:any = courses[i];
 
-      const result = await db.collection('courses').insertOne(newCourse);
+//       const newCourse: any = {...course};
+//       delete newCourse.id;
 
-      const courseId = result.insertedId;
+//       console.log("Inserting course ",  newCourse);
 
-      console.log("new course id", courseId);
+//       const result = await db.collection('courses').insertOne(newCourse);
 
-      const lessons = findLessonsForCourse(course.id);
+//       const courseId = result.insertedId;
 
-      for (let j = 0; j< lessons.length; j++) {
+//       console.log("new course id", courseId);
 
-        const lesson = lessons[j];
+//       const lessons = findLessonsForCourse(course.id);
 
-        const newLesson:any = {...lesson};
-        delete newLesson.id;
-        delete newLesson.courseId;
-        newLesson.course = new ObjectId(courseId);
+//       for (let j = 0; j< lessons.length; j++) {
 
-        console.log("Inserting lesson", newLesson);
+//         const lesson = lessons[j];
 
-        await db.collection("lessons").insertOne(newLesson);
+//         const newLesson:any = {...lesson};
+//         delete newLesson.id;
+//         delete newLesson.courseId;
+//         newLesson.course = new ObjectId(courseId);
 
-      }
+//         console.log("Inserting lesson", newLesson);
 
-    }
+//         await db.collection("lessons").insertOne(newLesson);
 
-    const users = findAllUsers();
+//       }
 
-    console.log("Inserting users " + users.length);
+//     }
 
-    for (let j = 0; j< users.length; j++) {
+//     const users = findAllUsers();
 
-      const user = users[j];
+//     console.log("Inserting users " + users.length);
 
-      const newUser:any = {...user};
-      delete newUser.id;
+//     for (let j = 0; j< users.length; j++) {
 
-      const hashPassword = util.promisify(password(newUser.password).hash);
+//       const user = users[j];
 
-      newUser.passwordHash = await hashPassword();
+//       const newUser:any = {...user};
+//       delete newUser.id;
 
-      delete newUser.password;
+//       const hashPassword = util.promisify(password(newUser.password).hash);
 
-      console.log("Inserting user", newUser);
+//       newUser.passwordHash = await hashPassword();
 
-      await db.collection("users").insertOne(newUser);
+//       delete newUser.password;
 
-    }
+//       console.log("Inserting user", newUser);
 
-    console.log('Finished uploading data, creating indexes.');
+//       await db.collection("users").insertOne(newUser);
 
-    await db.collection('courses').createIndex( { "url": 1 }, { unique: true } );
+//     }
 
-    console.log("Finished creating indexes, exiting.");
+//     console.log('Finished uploading data, creating indexes.');
 
-    client.close();
-    process.exit();
+//     await db.collection('courses').createIndex( { "url": 1 }, { unique: true } );
 
-  }
-  catch (error) {
-    console.log("Error caught, exiting: ", error);
-    client.close();
-    process.exit();
-  }
+//     console.log("Finished creating indexes, exiting.");
 
-});
+//     client.close();
+//     process.exit();
 
-console.log('updloading data to MongoDB...');
+//   }
+//   catch (error) {
+//     console.log("Error caught, exiting: ", error);
+//     client.close();
+//     process.exit();
+//   }
 
-process.stdin.resume();
+// });
+
+// console.log('updloading data to MongoDB...');
+
+// process.stdin.resume();
